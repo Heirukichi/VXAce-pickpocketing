@@ -7,7 +7,13 @@
 #-------------------------------------------------------------------------------
 # TERMS OF USE
 #-------------------------------------------------------------------------------
-# 
+# For terms of use and license check the script readme at the following link:
+# https://github.com/Heirukichi/VXAce-pickpocketing/blob/main/README.md
+#===============================================================================
+$imported = {} if $imported.nil?
+$imported[:HRK_Pickpocketing] = true
+#===============================================================================
+# ** HRK_PICKPOCKETING module
 #===============================================================================
 module HRK_PICKPOCKETING
   #=============================================================================
@@ -27,7 +33,7 @@ module HRK_PICKPOCKETING
     RESERVED_SWITCH_ID = 100
     #---------------------------------------------------------------------------
     # Total width of the pickpocketing bar.
-    # Default is 30.
+    # Default is 240.
     #---------------------------------------------------------------------------
     BAR_WIDTH = 240
     #---------------------------------------------------------------------------
@@ -397,4 +403,4 @@ class Game_Interpreter
       SceneManager.call(Scene_Pickpocketing)
     end
   end
-end
+end # end of Game_Interpreter class
