@@ -23,17 +23,8 @@ module HRK_PICKPOCKETING
   #=============================================================================
   module Config
     #---------------------------------------------------------------------------
-    # ID of the switch reserved to pickpocketing, used to trigger events once
-    # pickpocketing ends. Pickpocketing result can be checked and stored using
-    # HRK_PICKPOCKETING::Runtime.last_pickpocketing_result and assigning it to
-    # a variable. This switch has to be set to false manually directly inside
-    # the event based on it.
-    # Default is 100.
-    #---------------------------------------------------------------------------
-    RESERVED_SWITCH_ID = 100
-    #---------------------------------------------------------------------------
     # Total width of the pickpocketing bar.
-    # Default is 240.
+    # Default is 30.
     #---------------------------------------------------------------------------
     BAR_WIDTH = 240
     #---------------------------------------------------------------------------
@@ -200,6 +191,18 @@ module HRK_PICKPOCKETING
     def self.last_pickpocketing_result
       @last_result
     end
+    #---------------------------------------------------------------------------
+    # * Setter for event data
+    #---------------------------------------------------------------------------
+    def self.set_event_data(map, event, switch)
+      @event_data = [map, event, switch]
+    end
+    #---------------------------------------------------------------------------
+    # * Getter for event data
+    #---------------------------------------------------------------------------
+    def self.get_event_data
+      @event_data
+    end
   end # end of HRK_PICKPOCKETING::Runtime module
 end
 #===============================================================================
@@ -335,7 +338,8 @@ class Scene_Pickpocketing < Scene_Base
       puts("Pickpocketing attempt failed")
       HRK_PICKPOCKETING::Runtime.store_last_pickpocketing_result(false)
     end
-    $game_switches[HRK_PICKPOCKETING::Config::RESERVED_SWITCH_ID] = true
+    # $game_switches[HRK_PICKPOCKETING::Config::RESERVED_SWITCH_ID] = true
+    $game_self_switches[HRK_PICKPOCKETING::Runtime.get_event_data] = true
     return_scene
   end
   #-----------------------------------------------------------------------------
@@ -389,8 +393,9 @@ class Game_Interpreter
   #-----------------------------------------------------------------------------
   # * Start Pickpocketing
   #-----------------------------------------------------------------------------
-  def start_pickpocketing(event, difficulty = :normal)
+  def start_pickpocketing(self_switch, difficulty = :normal)
     player = $game_player
+    event = $game_map.events[@event_id]
     x = $game_map.round_x_with_direction(player.x, player.direction)
     y = $game_map.round_y_with_direction(player.y, player.direction)
     if (event.x == x && event.y == y && event.direction == player.direction)
@@ -400,7 +405,14 @@ class Game_Interpreter
       else
         HRK_PICKPOCKETING::Runtime.set_difficulty(difficulty)
       end
+      HRK_PICKPOCKETING::Runtime.set_event_data(@map_id, @event_id, self_switch)
       SceneManager.call(Scene_Pickpocketing)
     end
   end
-end # end of Game_Interpreter class
+  #-----------------------------------------------------------------------------
+  # * Check Last Pickpocket Result
+  #-----------------------------------------------------------------------------
+  def pickpocket_success?
+    HRK_PICKPOCKETING::Runtime.last_pickpocketing_result
+  end
+end
