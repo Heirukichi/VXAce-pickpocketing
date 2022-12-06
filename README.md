@@ -20,16 +20,16 @@ Once this script is installed in your game, check the Config module in the scrip
 
 After doing that, events that shall be pickpocketed MUST have the following line as a script call in the position where you want the pickpocketing to happen.
 
-`start_pickpocketing($game_map.events[@event_id], :normal)`
+`start_pickpocketing("A", :normal)`
 
-The `:normal` symbol can be changed with any symbol defined in the script difficulty settings.
+The `:normal` symbol can be changed with any symbol defined in the script difficulty settings, while the `"A"` part represents the self switch that is going to be triggered once pickpocketing ends.
 
-Once the pickpocketing ends, a designated switch is turned ON and action result can be checked in a conditional branch selecting the script option and using the following code:
-`HRK_PICKPOCKETING::Runtime.last_pickpocketing_result`
+Once the pickpocketing ends, the designated self switch is turned ON and action result can be checked in a conditional branch selecting the script option and using the following code:
+`pickpoket_success?`
 
 In the true branch, you shall put whatever happens in case of success, in the else branch, whatever happens in case of failure.
 
-At the end of the event, the designated switch MUST be set off, otherwise it will not be possible to perform subsequent pickpocketing actions.
+At the end of the event, the designated self switch MUST be set off, otherwise it will not be possible to perform subsequent pickpocketing actions.
 
 ### COMPATIBILITY
 
