@@ -365,7 +365,7 @@ class Scene_Pickpocketing < Scene_Base
     total_padding = @speed + cursor_padding
     max_width = HRK_PICKPOCKETING::Config::BAR_WIDTH / 2 - total_padding
     if (@cursor_position <= -max_width || @cursor_position >= max_width)
-      @direction *= -1
+      @direction *= -1 if @cursor_position * @direction > 0
     end
     @cursor_position += @direction * @speed
     new_x = @bar.x + @cursor_position
@@ -410,7 +410,7 @@ class Game_Interpreter
     end
   end
   #-----------------------------------------------------------------------------
-  # * Check Last Pickpocket Result
+  #
   #-----------------------------------------------------------------------------
   def pickpocket_success?
     HRK_PICKPOCKETING::Runtime.last_pickpocketing_result
