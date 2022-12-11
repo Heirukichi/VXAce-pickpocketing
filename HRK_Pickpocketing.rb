@@ -23,6 +23,19 @@ module HRK_PICKPOCKETING
   #=============================================================================
   module Config
     #---------------------------------------------------------------------------
+    # Background image shown during the pickpocketing scene and relevant data
+    # such as X and Y coordinates and image (including file path).
+    # If no image has to be shown, set :file to nil or remove that line entierly
+    # and the system adjusts so that no image is displayed.
+    #---------------------------------------------------------------------------
+    BG_IMG_DATA = {
+      # :file => nil, # This shows no picture.
+      :file => "Graphics/Pictures/sample", # Image path without extension.
+      :x => 0, # Image horizontal coordinate.
+      :y => 0, # Image vertical coordinate.
+      :center => false # When true, center image and ignore coordinates.
+    }
+    #---------------------------------------------------------------------------
     # Total width of the pickpocketing bar.
     # Default is 30.
     #---------------------------------------------------------------------------
@@ -147,6 +160,12 @@ module HRK_PICKPOCKETING
           "Selected settings lack sweet spot width. Was this intentional?",
           "    Default will be used. Check script configuration for errors."
         ]
+      },
+      :no_background_image => {
+        :type => :WARN,
+        :text => [
+          "No specified file path for background image. Assuming no image..."
+        ]
       }
     }
     def self.log_message(msg_code)
@@ -242,6 +261,7 @@ class Scene_Pickpocketing < Scene_Base
     @direction = 1
     @action_button_pressed = true
     create_background
+    create_background_image
     create_pickpocketing_window
   end
   #-----------------------------------------------------------------------------
@@ -250,6 +270,39 @@ class Scene_Pickpocketing < Scene_Base
   def terminate
     super
     dispose_background
+  end
+  #-----------------------------------------------------------------------------
+  # * Create Background Image
+  #-----------------------------------------------------------------------------
+  def create_background_image
+    @img_sprite = Sprite.new
+    img_data = HRK_PICKPOCKETING::Config::BG_IMG_DATA
+    bmp = img_data[:file]
+    if (bmp.nil?)
+      HRK_PICKPOCKETING::Debug.log_message(:no_background_image)
+    else
+      @img_sprite.bitmap = Bitmap.new(bmp)
+      if (img_data[:center])
+        puts("Center image")
+        w = @img_sprite.bitmap.width
+        h = @img_sprite.bitmap.height
+        x = (Graphics.width - w) / 2
+        y = (Graphics.height - h) / 2
+        puts("Coordinates: #{[x, y]}")
+        @img_sprite.x = x
+        @img_sprite.y = y
+        @img_sprite.z = 2
+      else
+        puts("Set image position")
+        x = img_data[:x] || 0
+        y = img_data[:y] || 0
+        puts("Coordinates: #{[x, y]}")
+        @img_sprite.x = x
+        @img_sprite.y = y
+        @img_sprite.z = 2
+      end
+      @img_sprite.update
+    end
   end
   #-----------------------------------------------------------------------------
   # * Create Pickpocketing Window
@@ -272,7 +325,7 @@ class Scene_Pickpocketing < Scene_Base
     y_offset = HRK_PICKPOCKETING::Config::BAR_CURSOR_VERTICAL_OFFSET
     @cursor = Window_Base.new(x + @cursor_position, y + y_offset, width, 10)
     @cursor.opacity = 0
-    @cursor.z = 3
+    @cursor.z = 13
   end
   #-----------------------------------------------------------------------------
   # * Create Pickpocket Bar
@@ -285,7 +338,7 @@ class Scene_Pickpocketing < Scene_Base
     @bar = Window_Base.new(x, y, width, height)
     @bar.arrows_visible = false
     @bar.back_opacity = 0
-    @bar.z = 1
+    @bar.z = 11
   end
   #-----------------------------------------------------------------------------
   # * Create Gauge Bar
@@ -296,7 +349,7 @@ class Scene_Pickpocketing < Scene_Base
     @border.opacity = 0
     @border.padding = 0
     @border.back_opacity = 0
-    @border.z = 0
+    @border.z = 10
     outer_data = HRK_PICKPOCKETING::Config::BAR_GAUGE_OUTER_COLOR
     inner_data = HRK_PICKPOCKETING::Config::BAR_GAUGE_INNER_COLOR
     color_out = Color.new(outer_data[0], outer_data[1], outer_data[2])
@@ -323,6 +376,7 @@ class Scene_Pickpocketing < Scene_Base
   #-----------------------------------------------------------------------------
   def dispose_background
     @background_sprite.dispose
+    @img_sprite.dispose
     @border.dispose
     @cursor.dispose
     @bar.dispose
